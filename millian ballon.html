@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balloon Animation</title>
+    <style>
+        @keyframes fly {
+            from {
+                top: 700px;
+            }
+            to {
+                top: 0px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        function Balloon(color, diameter, speed, id) {
+            this.color = color;
+            this.diameter = diameter;
+            this.speed = speed;
+            this.id = id;
+
+            this.make = function () {
+                let dv = document.createElement('div');
+                dv.id = 'b' + this.id;
+                dv.style.cssText = `width: ${this.diameter}px; height: ${this.diameter}px; border-radius: ${this.diameter / 2}px; background-color: ${this.color}; position: absolute; left: ${(this.id % 1000) * 2}px; top: 700px`;
+                dv.innerHTML = this.id;
+                return dv;
+            };
+
+            this.rise = function (dv) {
+                dv.style.animationName = "fly";
+                dv.style.animationDuration = Math.floor(700 / this.speed) + 's';
+            };
+        }
+
+        const fragment = document.createDocumentFragment();
+        const colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'brown', 'gray', 'cyan'];
+        for (let i = 0; i < 1000000; i++) {
+            let b = new Balloon(colors[i % colors.length], 5, Math.random() * 20 + 10, i);
+            let balloonElement = b.make();
+            b.rise(balloonElement);
+            fragment.appendChild(balloonElement);
+        }
+        document.body.appendChild(fragment);
+    </script>
+</body>
+
+</html>    
