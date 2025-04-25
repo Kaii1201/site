@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Name List</title>
+    <style>
+        table { border-collapse: collapse; width: 300px; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <table id="nameTable">
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+        </tr>
+        <tr>
+            <td>John</td>
+            <td>Doe</td>
+        </tr>
+        <tr>
+            <td>Alice</td>
+            <td>Smith</td>
+        </tr>
+        <tr>
+            <td>Bob</td>
+            <td>Johnson</td>
+        </tr>
+        <tr>
+            <td>Eve</td>
+            <td>Williams</td>
+        </tr>
+        <tr>
+            <td>Charlie</td>
+            <td>Brown</td>
+        </tr>
+    </table>
+
+    <script>
+        // 题目要求的实现
+        let sortbylastname = function() {
+            let tbl = document.getElementById("nameTable");
+            let rows = [];
+            
+            // 收集所有行（跳过表头）
+            for(let i = 1; i < tbl.rows.length; i++) {
+                rows.push(tbl.rows[i]);
+            }
+            
+            // 按姓氏排序
+            rows.sort(function(a, b) {
+                let lastA = a.cells[1].innerHTML.toLowerCase();
+                let lastB = b.cells[1].innerHTML.toLowerCase();
+                return lastA.localeCompare(lastB);
+            });
+            
+            // 移除所有行（保留表头）
+            while(tbl.rows.length > 1) {
+                tbl.deleteRow(1);
+            }
+            
+            // 添加排序后的行
+            for(let i = 0; i < rows.length; i++) {
+                tbl.appendChild(rows[i]);
+            }
+        }
+        
+        // 页面加载时自动排序
+        window.onload = sortbylastname;
+    </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balloon Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: white;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="balloonCanvas"></canvas>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('balloonCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Balloon colors restricted to specified palette
+        const COLORS = [
+            {name: 'red', value: '#FF0000'},
+            {name: 'orange', value: '#FFA500'},
+            {name: 'yellow', value: '#FFFF00'},
+            {name: 'green', value: '#008000'},
+            {name: 'black', value: '#000000'},
+            {name: 'blue', value: '#0000FF'},
+            {name: 'purple', value: '#800080'}
+        ];
+
+        // Balloon class
+        class Balloon {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100;
+                this.speed = 1 + Math.random() * 2;
+                this.diameter = 30 + Math.random() * 20;
+                this.color = COLORS[Math.floor(Math.random() * COLORS.length)].value;
+                this.burst = false;
+                this.burstTime = 0;
+                this.burstY = 100 + Math.random() * (canvas.height - 300); // Random burst altitude
+            }
+
+            rise() {
+                if (!this.burst) {
+                    this.y -= this.speed;
+                    // Balloon grows as it rises (simulating lower air pressure)
+                    this.diameter += 0.1;
+
+                    // Check if balloon should burst
+                    if (this.y <= this.burstY && !this.burst) {
+                        this.burst = true;
+                        this.burstTime = Date.now();
+                    }
+                }
+            }
+
+            draw() {
+                if (!this.burst) {
+                    // Draw balloon
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.diameter / 2, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+
+                    // Draw string
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y + this.diameter / 2);
+                    ctx.lineTo(this.x, this.y + this.diameter / 2 + 20);
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else if (Date.now() - this.burstTime < 1000) {
+                    // Draw burst effect for 1 second
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < 8; i++) {
+                        const angle = i * (Math.PI / 4);
+                        const endX = this.x + 30 * Math.cos(angle);
+                        const endY = this.y + 30 * Math.sin(angle);
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(endX, endY);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Create balloons
+        let balloons = [];
+        for (let i = 0; i < 20; i++) {
+            balloons.push(new Balloon());
+        }
+
+        // Animation loop
+        function animate() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update and draw balloons
+            balloons.forEach(balloon => {
+                balloon.rise();
+                balloon.draw();
+            });
+
+            // Remove balloons that have been burst for more than 1 second
+            balloons = balloons.filter(b => !b.burst || (Date.now() - b.burstTime < 1000));
+
+            // Add new balloons if needed
+            while (balloons.length < 20) {
+                balloons.push(new Balloon());
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
