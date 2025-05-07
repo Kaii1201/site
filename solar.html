@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <title>Solar System Simulation with Table</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #solar-system {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 600px;
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .planet:hover {
+            transform: scale(1.1);
+        }
+
+        #table-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s ease;
+        }
+
+        th:hover {
+            background-color: #e0e0e0;
+        }
+
+        th.sort-asc::after {
+            content: ' \25B2';
+        }
+
+        th.sort-desc::after {
+            content: ' \25BC';
+        }
+    </style>
+</head>
+
+<body>
+    <div id="solar-system"></div>
+    <div id="table-container">
+        <table id="object-table">
+            <thead>
+                <tr>
+                    <th data-sort="name">Name</th>
+                    <th data-sort="mass">Mass</th>
+                    <th data-sort="orbitRadius">Orbit Radius</th>
+                    <th data-sort="color">Color</th>
+                    <th data-sort="diameter">Diameter</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const solarSystem = document.getElementById('solar-system');
+        const tableContainer = document.getElementById('table-container');
+        const objectTable = document.getElementById('object-table');
+        const tableBody = objectTable.getElementsByTagName('tbody')[0];
+
+        const objects = [
+            { name: 'Sun', mass: 1.989e30, orbitRadius: 0, color: 'yellow', diameter: 1392700 },
+            { name: 'Mercury', mass: 3.3011e23, orbitRadius: 57.9e6, color: 'gray', diameter: 4880 },
+            { name: 'Venus', mass: 4.8675e24, orbitRadius: 108.2e6, color: 'orange', diameter: 12103.6 },
+            { name: 'Earth', mass: 5.97237e24, orbitRadius: 149.6e6, color: 'blue', diameter: 12742 },
+            { name: 'Mars', mass: 6.4171e23, orbitRadius: 227.9e6, color: 'red', diameter: 6779 },
+            { name: 'Jupiter', mass: 1.8982e27, orbitRadius: 778.5e6, color: 'brown', diameter: 139822 },
+            { name: 'Saturn', mass: 5.6834e26, orbitRadius: 1433.5e6, color: 'gold', diameter: 116464 },
+            { name: 'Uranus', mass: 8.681e25, orbitRadius: 2872.5e6, color: 'lightblue', diameter: 50724 },
+            { name: 'Neptune', mass: 1.0241e26, orbitRadius: 4495.1e6, color: 'darkblue', diameter: 49244 },
+            { name: 'Pluto', mass: 1.309e22, orbitRadius: 5906.4e6, color: 'brown', diameter: 2376.6 }
+        ];
+
+        
+        objects.forEach(object => {
+            const planet = document.createElement('div');
+            planet.classList.add('planet');
+            planet.style.width = `${object.diameter / 1000}px`;
+            planet.style.height = `${object.diameter / 1000}px`;
+            planet.style.backgroundColor = object.color;
+            planet.style.left = `${object.orbitRadius / 1e6}px`;
+            planet.style.top = '50%';
+            solarSystem.appendChild(planet);
+        });
+
+       
+        document.addEventListener('click', () => {
+            if (tableContainer.style.display === 'none') {
+                tableContainer.style.display = 'block';
+                populateTable();
+            } else {
+                tableContainer.style.display = 'none';
+            }
+        });
+
+        
+        function populateTable() {
+            tableBody.innerHTML = '';
+            objects.forEach(object => {
+                const row = tableBody.insertRow();
+                const nameCell = row.insertCell(0);
+                const massCell = row.insertCell(1);
+                const orbitRadiusCell = row.insertCell(2);
+                const colorCell = row.insertCell(3);
+                const diameterCell = row.insertCell(4);
+
+                nameCell.textContent = object.name;
+                massCell.textContent = object.mass;
+                orbitRadiusCell.textContent = object.orbitRadius;
+                colorCell.textContent = object.color;
+                diameterCell.textContent = object.diameter;
+            });
+        }
+
+        let currentSortColumn = null;
+        let sortDirection = 'asc';
+
+        
+        const headers = objectTable.getElementsByTagName('th');
+        for (let i = 0; i < headers.length; i++) {
+            headers[i].addEventListener('click', function () {
+                const sortBy = this.getAttribute('data-sort');
+                if (currentSortColumn === sortBy) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSortColumn = sortBy;
+                    sortDirection = 'asc';
+                }
+
+                objects.sort((a, b) => {
+                    if (sortDirection === 'asc') {
+                        if (a[sortBy] < b[sortBy]) {
+                            return -1;
+                        }
+                        if (a[sortBy] > b[sortBy]) {
+                            return 1;
+                        }
+                        return 0;
+                    } else {
+                        if (a[sortBy] > b[sortBy]) {
+                            return -1;
+                        }
+                        if (a[sortBy] < b[sortBy]) {
+                            return 1;
+                        }
+                        return 0;
+                    }
+                });
+
+             
+                for (let j = 0; j < headers.length; j++) {
+                    headers[j].classList.remove('sort-asc', 'sort-desc');
+                }
+
+             
+                if (sortDirection === 'asc') {
+                    this.classList.add('sort-asc');
+                } else {
+                    this.classList.add('sort-desc');
+                }
+
+                populateTable();
+            });
+        }
+    </script>
+</body>
+
+</html>
+    
